@@ -13,11 +13,11 @@ source.get_keyword_pattern = function()
 end
 
 source.complete = function(self, params, callback)
-  local offset = self:_invoke(vim.bo.omnifunc, { 1, '' })
-  if type(offset) ~= 'number' then
+  local offset_0 = self:_invoke(vim.bo.omnifunc, { 1, '' })
+  if type(offset_0) ~= 'number' then
     return callback()
   end
-  local result = self:_invoke(vim.bo.omnifunc, { 0, string.sub(params.context.cursor_before_line, offset) })
+  local result = self:_invoke(vim.bo.omnifunc, { 0, string.sub(params.context.cursor_before_line, offset_0 + 1) })
   if type(result) ~= 'table' then
     return callback()
   end
