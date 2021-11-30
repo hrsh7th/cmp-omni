@@ -32,6 +32,10 @@ source.complete = function(self, params, callback)
       table.insert(items, {
         label = v.abbr or v.word,
         insertText = v.word,
+        labelDetails = {
+          detail = v.kind,
+          description = v.menu,
+        },
       })
     end
   end
