@@ -39,6 +39,14 @@ source.complete = function(self, params, callback)
       })
     end
   end
+  if params.offset < offset_0 + 1 then
+    local follow = string.sub(params.context.cursor_before_line, params.offset, offset_0)
+    for _, item in ipairs(items) do
+      if item.insertText then
+        item.insertText = follow .. item.insertText
+      end
+    end
+  end
   callback({ items = items })
 end
 
@@ -48,11 +56,9 @@ source._invoke = function(_, func, args)
     return vim.api.nvim_call_function(func, args)
   end)
   local next_pos = vim.api.nvim_win_get_cursor(0)
-
   if prev_pos[1] ~= next_pos[1] or prev_pos[2] ~= next_pos[2] then
     vim.api.nvim_win_set_cursor(0, prev_pos)
   end
-
   return result
 end
 
