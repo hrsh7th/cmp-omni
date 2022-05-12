@@ -18,9 +18,11 @@ local kind_map =
   local acc = {
     v = lsp_kinds.Variable,
     f = lsp_kinds.Function,
+    p = lsp_kinds.Function,
     m = lsp_kinds.Property,
-    t = lsp_kinds.TypeParameter
-    --d = lsp_kinds.Macro
+    t = lsp_kinds.TypeParameter,
+    d = lsp_kinds.Macro,
+    s = lsp_kinds.Struct
   }
 
   for key, val in pairs(lsp_kinds) do
