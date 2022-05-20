@@ -11,6 +11,101 @@ end
 source.get_keyword_pattern = function()
   return [[\k\+]]
 end
+local kind_map =
+  (function()
+  local lsp_kinds = vim.lsp.protocol.CompletionItemKind
+
+  local acc = {
+    v = lsp_kinds.Variable,
+    f = lsp_kinds.Function,
+    p = lsp_kinds.Function,
+    m = lsp_kinds.Property,
+    t = lsp_kinds.TypeParameter,
+    d = lsp_kinds.Macro,
+    s = lsp_kinds.Struct
+  }
+
+  for key, val in pairs(lsp_kinds) do
+    if type(key) == "string" and type(val) == "number" then
+      acc[string.lower(key)] = val
+    end
+  end
+
+  return acc
+end)()
+local completefunc_items = function(matches)
+  vim.validate {
+    matches = {matches, "table"},
+    words = {matches.words, "table", true}
+  }
+
+  local words = matches.words and matches.words or matches
+
+  local parse = function(match)
+    vim.validate {
+      match = {match, "table"},
+      word = {match.word, "string"},
+      abbr = {match.abbr, "string", true},
+      menu = {match.menu, "string", true},
+      kind = {match.kind, "string", true},
+      info = {match.info, "string", true}
+    }
+
+    local kind_taken, menu_taken = false, false
+
+    local kind = (function()
+      local lkind = string.lower(match.kind or "")
+      if kind_map[lkind] then
+        kind_taken = true
+        return kind_map[lkind]
+      end
+      local lmenu = string.lower(match.menu or "")
+      if kind_map[lmenu] then
+        menu_taken = true
+        return kind_map[lmenu]
+      end
+
+      return nil
+    end)()
+
+    local label = (function()
+      local label = match.abbr or match.word
+      if match.menu and not menu_taken then
+        menu_taken = true
+        return label .. "\t" .. match.menu .. ""
+      else
+        return label
+      end
+    end)()
+
+    local detail = (function()
+      if match.info then
+        return match.info
+      elseif match.kind and not kind_taken then
+        return match.kind
+      else
+        return nil
+      end
+    end)()
+
+    local item = {
+      label = label,
+      insertText = match.word,
+      kind = kind,
+      detail = detail
+    }
+
+    return item
+  end
+
+  local acc = {}
+  for _, match in ipairs(words) do
+    local item = parse(match)
+    table.insert(acc, item)
+  end
+
+  return acc
+end
 
 source.complete = function(self, params, callback)
   local offset_0 = self:_invoke(vim.bo.omnifunc, { 1, '' })
@@ -22,23 +117,8 @@ source.complete = function(self, params, callback)
     return callback()
   end
 
-  local items = {}
-  for _, v in ipairs(result) do
-    if type(v) == 'string' then
-      table.insert(items, {
-        label = v,
-      })
-    elseif type(v) == 'table' then
-      table.insert(items, {
-        label = v.abbr or v.word,
-        insertText = v.word,
-        labelDetails = {
-          detail = v.kind,
-          description = v.menu,
-        },
-      })
-    end
-  end
+  local items = completefunc_items(result)
+
   if params.offset < offset_0 + 1 then
     local follow = string.sub(params.context.cursor_before_line, params.offset, offset_0)
     for _, item in ipairs(items) do
