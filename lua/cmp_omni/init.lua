@@ -52,9 +52,17 @@ end
 
 source._invoke = function(_, func, args)
   local prev_pos = vim.api.nvim_win_get_cursor(0)
+
+  local real_func = func
+  if vim.startswith(func, 'v:lua') then
+    table.insert(args, 1, func)
+    real_func = 'luaomni#exec'
+  end
+
   local _, result = pcall(function()
-    return vim.api.nvim_call_function(func, args)
+    return vim.api.nvim_call_function(real_func, args)
   end)
+
   local next_pos = vim.api.nvim_win_get_cursor(0)
   if prev_pos[1] ~= next_pos[1] or prev_pos[2] ~= next_pos[2] then
     vim.api.nvim_win_set_cursor(0, prev_pos)
