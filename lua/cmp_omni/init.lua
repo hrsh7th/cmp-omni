@@ -8,6 +8,10 @@ source.is_available = function()
   return vim.bo.omnifunc ~= ''
 end
 
+source.get_position_encoding_kind = function()
+  return 'utf-8'
+end
+
 source.get_keyword_pattern = function()
   return [[\k\+]]
 end
@@ -22,29 +26,39 @@ source.complete = function(self, params, callback)
     return callback()
   end
 
+  local text_edit_range = {
+    start = {
+      line = params.context.cursor.line,
+      character = offset_0,
+    },
+    ['end'] = {
+      line = params.context.cursor.line,
+      character = params.context.cursor.character,
+    },
+  }
+
   local items = {}
   for _, v in ipairs(result) do
     if type(v) == 'string' then
       table.insert(items, {
         label = v,
+        textEdit = {
+          range = text_edit_range,
+          newText = v,
+        },
       })
     elseif type(v) == 'table' then
       table.insert(items, {
         label = v.abbr or v.word,
-        insertText = v.word,
+        textEdit = {
+          range = v.word,
+          newText = v,
+        },
         labelDetails = {
           detail = v.kind,
           description = v.menu,
         },
       })
-    end
-  end
-  if params.offset < offset_0 + 1 then
-    local follow = string.sub(params.context.cursor_before_line, params.offset, offset_0)
-    for _, item in ipairs(items) do
-      if item.insertText then
-        item.insertText = follow .. item.insertText
-      end
     end
   end
   callback({ items = items })
