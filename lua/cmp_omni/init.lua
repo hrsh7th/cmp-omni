@@ -51,8 +51,8 @@ source.complete = function(self, params, callback)
       table.insert(items, {
         label = v.abbr or v.word,
         textEdit = {
-          range = v.word,
-          newText = v,
+          range = text_edit_range,
+          newText = v.word,
         },
         labelDetails = {
           detail = v.kind,
