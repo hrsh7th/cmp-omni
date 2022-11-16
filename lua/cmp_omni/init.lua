@@ -5,7 +5,7 @@ source.new = function()
 end
 
 source.is_available = function()
-  return vim.bo.omnifunc ~= ''
+  return vim.bo.omnifunc ~= '' and vim.api.nvim_get_mode().mode == 'i'
 end
 
 source.get_position_encoding_kind = function()
@@ -67,7 +67,7 @@ end
 source._invoke = function(_, func, args)
   local prev_pos = vim.api.nvim_win_get_cursor(0)
   local _, result = pcall(function()
-    return vim.api.nvim_call_function(func, args)
+    return vim.fn['cmp_omni#invoke'](func, args)
   end)
   local next_pos = vim.api.nvim_win_get_cursor(0)
   if prev_pos[1] ~= next_pos[1] or prev_pos[2] ~= next_pos[2] then
@@ -75,6 +75,8 @@ source._invoke = function(_, func, args)
   end
   return result
 end
+
+
 
 return source
 
