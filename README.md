@@ -7,10 +7,23 @@ nvim-cmp source for omnifunc.
 ```lua
 require'cmp'.setup {
   sources = {
-    { name = 'omni' }
+    {
+      name = 'omni',
+      option = {
+        disable_omnifuncs = { 'v:lua.vim.lsp.omnifunc' }
+      }
+    }
   }
 }
 ```
+
+# Option
+
+### disable_omnifuncs: string[]
+default: `{ 'v:lua.vim.lsp.omnifunc' }`
+
+The list of omnifunc names that should be disabled.
+
 
 # Warning
 

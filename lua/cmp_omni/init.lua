@@ -1,11 +1,15 @@
 local source = {}
 
+local default_option = {
+  disable_omnifuncs = { 'v:lua.vim.lsp.omnifunc' }
+}
+
 source.new = function()
   return setmetatable({}, { __index = source })
 end
 
 source.is_available = function()
-  return vim.bo.omnifunc ~= '' and vim.api.nvim_get_mode().mode == 'i'
+  return vim.bo.omnifunc ~= '' and vim.api.nvim_get_mode().mode == 'i' and not vim.tbl_contains(default_option.disable_omnifuncs, vim.bo.omnifunc)
 end
 
 source.get_position_encoding_kind = function()
