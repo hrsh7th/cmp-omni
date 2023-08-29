@@ -41,6 +41,12 @@ source.complete = function(self, params, callback)
     },
   }
 
+  -- As per :help complete-functions, a complete function may return a list
+  -- or a dictionary { words = <list>, refresh = 'always' }.
+  if result.words ~= nil then
+    result = result.words
+  end
+
   local items = {}
   for _, v in ipairs(result) do
     if type(v) == 'string' then
